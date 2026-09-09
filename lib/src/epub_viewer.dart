@@ -234,9 +234,11 @@ class _EpubViewerState extends State<EpubViewer> {
     // Use CSS touch-action to block horizontal panning/swiping when selection exists
     // This works at the browser level, before JavaScript event handlers
     // We apply it to the parent document and iframe elements (not sandboxed contents)
-    webViewController?.evaluateJavascript(
-      source: 'blockGesturesWhenSelected(${block ? 'true' : 'false'})',
-    );
+    webViewController
+        ?.evaluateJavascript(
+          source: 'blockGesturesWhenSelected(${block ? 'true' : 'false'})',
+        )
+        .catchError((_) {});
   }
 
   void _handleSelection({
@@ -633,6 +635,9 @@ class _EpubViewerState extends State<EpubViewer> {
           );
         },
         shouldOverrideUrlLoading: (controller, navigationAction) async {
+          if (navigationAction.isForMainFrame) {
+            return NavigationActionPolicy.CANCEL;
+          }
           return NavigationActionPolicy.ALLOW;
         },
         onLoadStop: (controller, url) async {},
@@ -649,9 +654,10 @@ class _EpubViewerState extends State<EpubViewer> {
           // Trigger JavaScript to check for selection after a delay
           // Also set up periodic checking for selection changes (when handles are dragged)
           Future.delayed(const Duration(milliseconds: 300), () {
-            controller.evaluateJavascript(
-              source: 'checkSelectionAfterLongPress()',
-            );
+            if (!mounted) return;
+            controller
+                .evaluateJavascript(source: 'checkSelectionAfterLongPress()')
+                .catchError((_) {});
 
             // Set up periodic checking for selection changes (when handles are dragged)
             // Check every 150ms for up to 10 seconds after long press
@@ -659,14 +665,14 @@ class _EpubViewerState extends State<EpubViewer> {
             var maxChecks = 67; // 67 * 150ms = ~10 seconds
             Timer.periodic(const Duration(milliseconds: 150), (timer) {
               checkCount++;
-              if (checkCount > maxChecks) {
+              if (checkCount > maxChecks || !mounted) {
                 timer.cancel();
                 return;
               }
 
-              controller.evaluateJavascript(
-                source: 'checkSelectionPeriodically()',
-              );
+              controller
+                  .evaluateJavascript(source: 'checkSelectionPeriodically()')
+                  .catchError((_) {});
             });
           });
         },
@@ -705,7 +711,8 @@ class _EpubViewerState extends State<EpubViewer> {
               _stopSelectionMonitoring();
               _blockGesturesWhenSelected(false);
             }
-          });
+          })
+          .catchError((_) {});
     });
   }
 
