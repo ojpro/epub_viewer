@@ -122,9 +122,18 @@ class EpubController {
   }
 
   ///Adds a underline annotation
-  addUnderline({required String cfi}) {
+  addUnderline({
+    ///Cfi string of the desired location
+    required String cfi,
+
+    ///Colour of the underline stroke
+    Color color = Colors.yellow,
+  }) {
+    var colorHex = color.toHex();
     checkEpubLoaded();
-    webViewController?.evaluateJavascript(source: 'addUnderLine("$cfi")');
+    webViewController?.evaluateJavascript(
+      source: 'addUnderLine("$cfi", "$colorHex")',
+    );
   }
 
   ///Adds a mark annotation
