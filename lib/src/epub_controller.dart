@@ -45,8 +45,7 @@ class EpubController {
     webViewController?.evaluateJavascript(source: 'previous()');
   }
 
-   Completer<EpubLocation> currentLocationCompleter =
-      Completer<EpubLocation>();
+  Completer<EpubLocation> currentLocationCompleter = Completer<EpubLocation>();
 
   ///Returns current location of epub viewer
   Future<EpubLocation> getCurrentLocation() async {
@@ -128,11 +127,13 @@ class EpubController {
 
     ///Colour of the underline stroke
     Color color = Colors.yellow,
+
+    double width = 3,
   }) {
     var colorHex = color.toHex();
     checkEpubLoaded();
     webViewController?.evaluateJavascript(
-      source: 'addUnderLine("$cfi", "$colorHex")',
+      source: 'addUnderLine("$cfi", "$colorHex", "$width")',
     );
   }
 
@@ -294,5 +295,3 @@ class EpubController {
     }
   }
 }
-
-
