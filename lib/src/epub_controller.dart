@@ -177,6 +177,12 @@ class EpubController {
     await webViewController?.evaluateJavascript(source: 'setFlow("$flow")');
   }
 
+  Future<void> setDisableVerticalScroll(bool disabled) async {
+    await webViewController?.setSettings(
+      settings: InAppWebViewSettings(disableVerticalScroll: disabled),
+    );
+  }
+
   ///Set [EpubManager] value
   setManager({required EpubManager manager}) async {
     await webViewController?.evaluateJavascript(

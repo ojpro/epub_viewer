@@ -1,3 +1,7 @@
+## 1.2.9
+- Add opacity, width and getRectFromCfi
+- Add option to disable vertical scrolling
+
 ## 1.2.8
 - Fixed `getCurrentLocation` function
 
