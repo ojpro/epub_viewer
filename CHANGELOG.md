@@ -1,3 +1,7 @@
+## 1.2.10
+- Fix scrolled flow jumping when a section is prepended: disable browser scroll anchoring on `.epub-container` so epub.js's own compensation is the only one applied (Chromium/Android WebView compensated twice)
+- Fix `relocated` being swallowed while a finished selection exists: removed the selection guard, whose revert branch could never run
+
 ## 1.2.9
 - Add opacity, width and getRectFromCfi
 - Add option to disable vertical scrolling
