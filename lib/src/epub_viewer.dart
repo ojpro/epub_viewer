@@ -635,7 +635,15 @@ class _EpubViewerState extends State<EpubViewer> {
           );
         },
         shouldOverrideUrlLoading: (controller, navigationAction) async {
-          if (navigationAction.isForMainFrame) {
+          // Keep the viewer on its own page: a link must never navigate the
+          // main frame away from it. The page itself (a local file) and the
+          // book's frames (about:/data:/blob:) still load — on iOS the
+          // initial load of the page comes through here too, and cancelling
+          // it leaves the viewer blank.
+          final url = navigationAction.request.url;
+          final isOwnPage = url == null ||
+              const {'file', 'about', 'data', 'blob'}.contains(url.scheme);
+          if (navigationAction.isForMainFrame && !isOwnPage) {
             return NavigationActionPolicy.CANCEL;
           }
           return NavigationActionPolicy.ALLOW;
