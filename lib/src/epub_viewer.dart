@@ -36,6 +36,7 @@ class EpubViewer extends StatefulWidget {
     this.initialXPath,
     this.onChaptersLoaded,
     this.onEpubLoaded,
+    this.onLoadFailed,
     this.onLocationLoaded,
     this.onRelocated,
     this.onTextSelected,
@@ -71,6 +72,11 @@ class EpubViewer extends StatefulWidget {
 
   ///Call back when epub is loaded and displayed
   final VoidCallback? onEpubLoaded;
+
+  /// Called once when the book can't be opened: its data couldn't be read,
+  /// or it isn't a readable EPUB (damaged, or another kind of file). With
+  /// the error's stack when epub.js gave one, else its message.
+  final ValueChanged<String>? onLoadFailed;
 
   /// Callback when the location are generated for epub, progress will be only available after this
   final VoidCallback? onLocationLoaded;
@@ -296,6 +302,13 @@ class _EpubViewerState extends State<EpubViewer> {
   }
 
   void addJavaScriptHandlers() {
+    webViewController?.addJavaScriptHandler(
+      handlerName: "loadFailed",
+      callback: (data) {
+        widget.onLoadFailed?.call(data.isEmpty ? 'unknown' : '${data.first}');
+      },
+    );
+
     webViewController?.addJavaScriptHandler(
       handlerName: "displayed",
       callback: (data) {
@@ -571,7 +584,13 @@ class _EpubViewerState extends State<EpubViewer> {
   }
 
   Future<void> loadBook() async {
-    var data = await widget.epubSource.epubData;
+    final List<int> data;
+    try {
+      data = await widget.epubSource.epubData;
+    } catch (e) {
+      widget.onLoadFailed?.call('$e');
+      return;
+    }
     final displaySettings = widget.displaySettings ?? EpubDisplaySettings();
     String manager = displaySettings.manager.name;
     String flow = displaySettings.flow.name;
